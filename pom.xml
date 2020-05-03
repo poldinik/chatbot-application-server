@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>it.unifi.ing</groupId>
+  <artifactId>chatbot-application-server</artifactId>
+  <version>1.0</version>
+  <packaging>war</packaging>
+
+  <name>chatbot-application-server</name>
+
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <failOnMissingWebXml>false</failOnMissingWebXml>
+    <version.jboss.bom>19.0.0.Final</version.jboss.bom>
+    <version.wildfly.maven.plugin>1.2.1.Final</version.wildfly.maven.plugin>
+  </properties>
+
+  <dependencies>
+
+    <!-- JAVA EE API -->
+
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-api</artifactId>
+      <version>8.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- MySQL DRIVER -->
+
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.11</version>
+    </dependency>
+
+    <!-- Hibernate -->
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>5.3.1.Final</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- JUnit -->
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- MicroProfile -->
+    <dependency>
+      <groupId>org.eclipse.microprofile</groupId>
+      <artifactId>microprofile</artifactId>
+      <version>3.3</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Lombok -->
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.10</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Google Auth -->
+
+    <dependency>
+      <groupId>com.google.auth</groupId>
+      <artifactId>google-auth-library-oauth2-http</artifactId>
+      <version>0.19.0</version>
+    </dependency>
+
+    <!-- Log4J -->
+
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.15</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>jmxri</artifactId>
+          <groupId>com.sun.jmx</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jmxtools</artifactId>
+          <groupId>com.sun.jdmk</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jms</artifactId>
+          <groupId>javax.jms</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <finalName>app</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.wildfly.plugins</groupId>
+        <artifactId>wildfly-maven-plugin</artifactId>
+        <version>${version.wildfly.maven.plugin}</version>
+        <executions>
+          <execution>
+            <id>deploy-driver</id>
+            <phase>package</phase>
+            <configuration>
+              <groupId>mysql</groupId>
+              <artifactId>mysql-connector-java</artifactId>
+              <name>mysql-connector-java-8.0.11.jar</name>
+            </configuration>
+            <goals>
+              <goal>deploy-artifact</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>add-datasource</id>
+            <phase>package</phase>
+            <configuration>
+              <force>true</force>
+              <address>subsystem=datasources,data-source=java:jboss/datasources/MySqlDS</address>
+              <resources>
+                <resource>
+                  <properties>
+                    <jndi-name>java:jboss/datasources/MySqlDS</jndi-name>
+                    <enable>true</enable>
+                    <connection-url>jdbc:mysql://localhost:3306/swam_test?serverTimezone=UTC</connection-url>
+                    <driver-name>mysql-connector-java-8.0.11.jar</driver-name>
+                    <user-name>root</user-name>
+                    <password>root</password>
+                    <pool-name>people-web</pool-name>
+                    <use-java-context>true</use-java-context>
+                  </properties>
+                </resource>
+              </resources>
+            </configuration>
+            <goals>
+              <goal>add-resource</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <add-user>
+            <users>
+              <user>
+                <username>admin</username>
+                <password>admin</password>
+              </user>
+            </users>
+          </add-user>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
